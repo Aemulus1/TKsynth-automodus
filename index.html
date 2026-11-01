@@ -430,4 +430,84 @@ const previousMachineSetMode=machineSetMode;
 machineSetMode=function(mode){previousMachineSetMode(mode);if(mode==='auto'||mode==='semi'){
   [57,60,63,66,69,72,75].forEach(n=>pianoLoad(n).catch(()=>{}));
 }};
+
+// v3.2: evolving arrangement; preserve all three modes and embedded piano samples.
+let autoPhraseShape=[],autoPhraseNumber=-1,autoLastPitch=null;
+const autoShapes=[[0,2,1,4,3,2,1,0],[0,1,3,2,4,3,1,2],[2,3,4,2,1,0,2,1],[4,3,1,2,0,1,3,2]];
+const autoBaseArrange=machineArrange;
+machineArrange=function(){
+ autoBaseArrange();autoPhraseNumber=-1;autoLastPitch=null;
+ $('preset').value='grand';$('preset').dispatchEvent(new Event('change'));
+ $('padEnable').checked=true;$('padChords').checked=true;
+ $('padVolume').value='.34';$('padVolume').dispatchEvent(new Event('input'));
+ $('bassVolume').value='.28';$('bassVolume').dispatchEvent(new Event('input'));
+ $('drumVolume').value='.23';$('drumVolume').dispatchEvent(new Event('input'));
+ $('padAttack').value='.35';$('padAttack').dispatchEvent(new Event('input'));
+ $('padRelease').value='1.8';$('padRelease').dispatchEvent(new Event('input'));
+ // Four harmonically aligned chords and a quieter bass rhythm.
+ for(let bar=0;bar<4;bar++)for(let j=0;j<16;j++){
+  const k=bar*16+j,hit=j===0||j===8||(bar%2===1&&j===11);
+  bassPattern[k]=hit?36+(j===8?7:0):null;
+  bassLengths[k]=hit?(j===0?2:1):0;
+  bassAccents[k]=j===0;
+ }
+ bassRender();
+};
+function autoNewPhrase(phrase){
+ autoPhraseNumber=phrase;
+ autoPhraseShape=autoShapes[(phrase+machineRand(autoShapes.length))%autoShapes.length].slice();
+ // Every 4 bars change texture and rhythmic density, without losing harmony.
+ const section=Math.floor(phrase/2)%4;
+ const padChoices=['warm','dreamscape','space','strings'];
+ $('padSound').value=padChoices[section];
+ $('padVolume').value=section===2?'.26':'.34';$('padVolume').dispatchEvent(new Event('input'));
+ $('bassSound').value=['bassguitar','sub','rubber','bassguitar'][section];
+ for(let i=0;i<patterns.length;i++)for(let j=0;j<64;j++){
+  const beat=j%16;
+  patterns[i][j]=i===0?(beat===0||(section!==2&&beat===8)):
+   i===1?(section===2?beat===12:(beat===4||beat===12)):
+   i===3?(section===2?beat===6:(beat===2||beat===6||beat===10||beat===14)):
+   i===4?(section===3&&beat===15):false;
+ }
+ render();
+ machineStatus('AUTO · Variatie '+(phrase+1)+' · '+padChoices[section]+' · piano en akkoorden');
+}
+machineStep=function(currentStep,when){
+ if(machineMode==='solo')return;
+ const bar=Math.floor(currentStep/16),pos=currentStep%16;
+ if(machineMode==='semi'){
+  if(pos===0){for(let i=0;i<4;i++){padRoots[i]=36+machineKey;padQualities[i]=machineQuality;}padRender();setBassRoot(60+machineKey)}
+  return; // Let the player lead; no unsolicited piano notes.
+ }
+ const phrase=Math.floor(bar/4);
+ if(pos===0&&phrase!==autoPhraseNumber)autoNewPhrase(phrase);
+ // A new phrase every four measures; silence and varying note lengths are intentional.
+ const slots=[2,4,6,8,10,12,14];
+ const slot=slots.indexOf(pos);
+ if(slot<0)return;
+ const density=[.70,.52,.30,.62][phrase%4];
+ if(Math.random()>density || (bar%4===3&&pos>=10))return;
+ const chordIndex=Math.floor(currentStep/(16*(+$('padBars').value)))%4;
+ const root=padRoots[chordIndex];
+ const third=padQualities[chordIndex]==='minor'?3:4;
+ const degrees=[0,third,7,12,15,19];
+ let index=autoPhraseShape[(slot+bar)%autoPhraseShape.length]%degrees.length;
+ let midi=root+24+degrees[index];
+ while(midi>74)midi-=12;while(midi<55)midi+=12;
+ if(autoLastPitch!==null&&Math.abs(midi-autoLastPitch)>8){
+  const candidate=midi+(midi>autoLastPitch?-12:12);
+  if(candidate>=55&&candidate<=74)midi=candidate;
+ }
+ autoLastPitch=midi;
+ const note=midi,key='autoPiano'+currentStep;
+ const beat=60/Math.max(50,Math.min(220,+$('bpm').value||120));
+ const duration=beat*([.7,1.3,1.9][(slot+phrase)%3]);
+ machineSchedule(when,()=>{
+  pianoSampleOn(note,key);
+  const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(key,note)},duration*1000);
+  machineTimers.add(id);
+ });
+};
+const autoPreviousClear=machineClearTimers;
+machineClearTimers=function(){autoPreviousClear();for(const [key,v] of [...pianoVoices])if(String(key).startsWith('autoPiano'))pianoSampleOff(key,v.midi);autoPhraseNumber=-1;autoLastPitch=null};
 </script></body></html>
