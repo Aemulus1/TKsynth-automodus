@@ -453,61 +453,82 @@ machineArrange=function(){
  }
  bassRender();
 };
-function autoNewPhrase(phrase){
- autoPhraseNumber=phrase;
- autoPhraseShape=autoShapes[(phrase+machineRand(autoShapes.length))%autoShapes.length].slice();
- // Every 4 bars change texture and rhythmic density, without losing harmony.
- const section=Math.floor(phrase/2)%4;
- const padChoices=['warm','dreamscape','space','strings'];
- $('padSound').value=padChoices[section];
- $('padVolume').value=section===2?'.26':'.34';$('padVolume').dispatchEvent(new Event('input'));
- $('bassSound').value=['bassguitar','sub','rubber','bassguitar'][section];
+// v3.3: song sections, chord progressions and recurring chorus hook.
+const songSections=[['INTRO',4],['STROFE',8],['REFREIN',8],['STROFE 2',8],['REFREIN',8],['BRIDGE',8],['REFREIN',8],['OUTRO',4]];
+let songSectionIndex=-1,songSectionStart=0,songChorusHook=null,songVerseHook=null;
+const songMinor=[[0,8,3,10],[0,5,8,7],[0,3,10,8],[5,8,0,7]];
+const songMajor=[[0,7,9,5],[0,5,9,7],[5,0,7,9],[9,5,0,7]];
+let songProgressions=null;
+function songPosition(bar){let cycle=songSections.reduce((n,s)=>n+s[1],0),within=bar%cycle;
+ for(let i=0;i<songSections.length;i++){const len=songSections[i][1];if(within<len)return {index:i,name:songSections[i][0],local:within};within-=len}
+ return {index:0,name:'INTRO',local:0};}
+function songChangeSection(section){
+ songSectionIndex=section.index;songSectionStart=section.local;
+ const chorus=section.name==='REFREIN',intro=section.name==='INTRO',outro=section.name==='OUTRO',bridge=section.name==='BRIDGE';
+ const progression=songProgressions[chorus?1:bridge?2:intro||outro?3:0];
+ for(let i=0;i<4;i++){padRoots[i]=36+machineKey+progression[i];padQualities[i]=machineQuality;}
+ padRender();
+ $('padBars').value='2'; // Each chord lasts two measures; one 8-bar section is four chords.
+ $('padEnable').checked=true;$('padChords').checked=true;
+ $('padSound').value=chorus?'dreamscape':bridge?'space':intro||outro?'warm':'strings';
+ $('padVolume').value=chorus?'.36':intro||outro?'.24':'.31';$('padVolume').dispatchEvent(new Event('input'));
+ $('bassVolume').value=intro||outro?'.16':chorus?'.31':'.25';$('bassVolume').dispatchEvent(new Event('input'));
+ $('drumVolume').value=intro||outro?'.10':chorus?'.30':'.21';$('drumVolume').dispatchEvent(new Event('input'));
+ $('bassSound').value=chorus?'bassguitar':bridge?'sub':'bassguitar';
  for(let i=0;i<patterns.length;i++)for(let j=0;j<64;j++){
   const beat=j%16;
-  patterns[i][j]=i===0?(beat===0||(section!==2&&beat===8)):
-   i===1?(section===2?beat===12:(beat===4||beat===12)):
-   i===3?(section===2?beat===6:(beat===2||beat===6||beat===10||beat===14)):
-   i===4?(section===3&&beat===15):false;
+  patterns[i][j]=i===0?(!intro&&!outro&&(beat===0||(chorus&&beat===8))):
+   i===1?(!intro&&!outro&&(chorus?(beat===4||beat===12):beat===12)):
+   i===3?(!intro&&!outro&&(chorus?beat%4===2:beat===6||beat===14)):
+   i===4?(chorus&&beat===15):false;
  }
- render();
- machineStatus('AUTO · Variatie '+(phrase+1)+' · '+padChoices[section]+' · piano en akkoorden');
+ render();machineStatus('AUTO · '+section.name+' · akkoordenschema en melodie');
+}
+const chorusContours=[[0,2,4,3,2,1,4,2],[2,3,4,2,1,0,2,0],[4,3,2,1,2,3,1,0]];
+const verseContours=[[0,1,2,1,3,2,1,0],[2,1,0,2,3,1,0,1],[0,2,1,3,2,0,1,0]];
+function songMakeHooks(){songChorusHook=chorusContours[machineRand(chorusContours.length)].slice();songVerseHook=verseContours[machineRand(verseContours.length)].slice()}
+function songPhrase(phrase){
+ autoPhraseNumber=phrase;
+ // A section determines the harmony; phrase changes only melodic expression.
+ autoPhraseShape=autoShapes[machineRand(autoShapes.length)].slice();
 }
 machineStep=function(currentStep,when){
  if(machineMode==='solo')return;
  const bar=Math.floor(currentStep/16),pos=currentStep%16;
  if(machineMode==='semi'){
   if(pos===0){for(let i=0;i<4;i++){padRoots[i]=36+machineKey;padQualities[i]=machineQuality;}padRender();setBassRoot(60+machineKey)}
-  return; // Let the player lead; no unsolicited piano notes.
+  return;
  }
+ const section=songPosition(bar);
+ if(pos===0&&section.index!==songSectionIndex)songChangeSection(section);
  const phrase=Math.floor(bar/4);
- if(pos===0&&phrase!==autoPhraseNumber)autoNewPhrase(phrase);
- // A new phrase every four measures; silence and varying note lengths are intentional.
- const slots=[2,4,6,8,10,12,14];
- const slot=slots.indexOf(pos);
+ if(pos===0&&phrase!==autoPhraseNumber)songPhrase(phrase);
+ const slots=[2,4,6,8,10,12,14],slot=slots.indexOf(pos);
  if(slot<0)return;
- const density=[.70,.52,.30,.62][phrase%4];
- if(Math.random()>density || (bar%4===3&&pos>=10))return;
- const chordIndex=Math.floor(currentStep/(16*(+$('padBars').value)))%4;
- const root=padRoots[chordIndex];
+ const chorus=section.name==='REFREIN',bridge=section.name==='BRIDGE',intro=section.name==='INTRO',outro=section.name==='OUTRO';
+ const motif=chorus?songChorusHook:songVerseHook;
+ const density=chorus?.78:bridge?.38:intro||outro?.22:.49;
+ if(Math.random()>density||(bar%4===3&&pos>=12))return;
+ // Match the same chord index used by the pad sequencer, including section boundaries.
+ const chordIndex=Math.floor(bar/2)%4,root=padRoots[chordIndex];
  const third=padQualities[chordIndex]==='minor'?3:4;
- const degrees=[0,third,7,12,15,19];
- let index=autoPhraseShape[(slot+bar)%autoPhraseShape.length]%degrees.length;
+ const degrees=[0,third,7,12,third+12,19];
+ const index=motif[(slot+Math.floor(section.local/2))%motif.length]%degrees.length;
  let midi=root+24+degrees[index];
  while(midi>74)midi-=12;while(midi<55)midi+=12;
- if(autoLastPitch!==null&&Math.abs(midi-autoLastPitch)>8){
-  const candidate=midi+(midi>autoLastPitch?-12:12);
-  if(candidate>=55&&candidate<=74)midi=candidate;
- }
+ if(autoLastPitch!==null&&Math.abs(midi-autoLastPitch)>9){const near=midi+(midi>autoLastPitch?-12:12);if(near>=55&&near<=74)midi=near}
  autoLastPitch=midi;
  const note=midi,key='autoPiano'+currentStep;
  const beat=60/Math.max(50,Math.min(220,+$('bpm').value||120));
- const duration=beat*([.7,1.3,1.9][(slot+phrase)%3]);
- machineSchedule(when,()=>{
-  pianoSampleOn(note,key);
-  const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(key,note)},duration*1000);
-  machineTimers.add(id);
- });
+ const duration=beat*(chorus?(slot%3===0?1.5:.8):(slot%3===0?1.7:.7));
+ machineSchedule(when,()=>{pianoSampleOn(note,key);const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(key,note)},duration*1000);machineTimers.add(id)});
+};
+const priorSongArrange=machineArrange;
+machineArrange=function(){priorSongArrange();songProgressions=(machineQuality==='minor'?songMinor:songMajor).map(p=>p.slice());
+ songMakeHooks();songSectionIndex=-1;autoPhraseNumber=-1;autoLastPitch=null;
+ $('preset').value='grand';$('preset').dispatchEvent(new Event('change'));
+ $('bassFollowPad').checked=true;$('padBars').value='2';
 };
 const autoPreviousClear=machineClearTimers;
-machineClearTimers=function(){autoPreviousClear();for(const [key,v] of [...pianoVoices])if(String(key).startsWith('autoPiano'))pianoSampleOff(key,v.midi);autoPhraseNumber=-1;autoLastPitch=null};
+machineClearTimers=function(){autoPreviousClear();for(const [key,v] of [...pianoVoices])if(String(key).startsWith('autoPiano'))pianoSampleOff(key,v.midi);autoPhraseNumber=-1;autoLastPitch=null;songSectionIndex=-1};
 </script></body></html>
