@@ -533,6 +533,62 @@ machineArrange=function(){priorSongArrange();songProgressions=(machineQuality===
  $('preset').value='grand';$('preset').dispatchEvent(new Event('change'));
  $('bassFollowPad').checked=true;$('padBars').value='2';
 };
+// v3.5: gentle, section-aware filter and FX automation (AUTO only).
+// Restore the user's manual settings when leaving AUTO.
+let autoFxBackup=null,autoFxSection=-1;
+const autoFxClone=()=>({cutoff:$('cutoff').value,res:$('res').value,
+ fx:Object.fromEntries(Object.entries(FX).map(([id,x])=>[id,{on:x.on,values:{...x.values}}]))});
+function autoFxRestore(){if(!autoFxBackup)return;
+ $('cutoff').value=autoFxBackup.cutoff;$('res').value=autoFxBackup.res;
+ ['cutoff','res'].forEach(id=>$(id).dispatchEvent(new Event('input')));
+ for(const [id,saved] of Object.entries(autoFxBackup.fx)){FX[id].on=saved.on;Object.assign(FX[id].values,saved.values);applyFX(id)}
+ if(fxOpen)fxPanel(fxOpen);autoFxBackup=null;autoFxSection=-1;
+}
+function autoFxSectionChange(section){
+ if(machineMode!=='auto'||!ctx)return;
+ const chorus=section.name==='REFREIN',bridge=section.name==='BRIDGE',intro=section.name==='INTRO',outro=section.name==='OUTRO';
+ // FX amounts remain modest to keep the sample piano clear.
+ const config={
+ '01':{on:chorus||bridge,values:{mix:chorus?.17:.12,feedback:.20,sync:'1/8'}},
+ '02':{on:true,values:{mix:chorus?.19:bridge?.25:.15,decay:bridge?3.1:2.2,damping:.55}},
+ '03':{on:chorus||bridge,values:{mix:chorus?.12:.09,rate:.36,depth:.28,stereo:.55}},
+ '04':{on:bridge,values:{mix:.09,rate:.22,depth:.33,feedback:.15}}
+ };
+ for(const [id,c] of Object.entries(config)){FX[id].on=c.on;Object.assign(FX[id].values,c.values);applyFX(id)}
+ if(fxOpen)fxPanel(fxOpen);
+ autoFxSection=section.index;
+}
+function autoFxBar(bar){
+ if(machineMode!=='auto'||!ctx)return;
+ const section=songPosition(bar);
+ if(autoFxSection!==section.index)autoFxSectionChange(section);
+ // Slowly moving cutoff and resonance, with a different contour per section.
+ const chorus=section.name==='REFREIN',bridge=section.name==='BRIDGE';
+ const phase=(section.local%8)/8*Math.PI*2;
+ const target=chorus?5700+850*Math.sin(phase):bridge?3400+1000*Math.sin(phase):4200+650*Math.sin(phase);
+ const resonance=chorus?1.15:bridge?1.65:.8;
+ $('cutoff').value=Math.round(Math.max(900,Math.min(12000,target)));
+ $('res').value=resonance;
+ $('cutoffV').textContent=$('cutoff').value+' Hz';$('resV').textContent=resonance.toFixed(1);
+ // Gentle smoothing; avoid abruptly changing the piano sound.
+ filter.frequency.setTargetAtTime(target,ctx.currentTime,.45);
+ filter.Q.setTargetAtTime(resonance,ctx.currentTime,.35);
+}
+const autoFxPreviousSetMode=machineSetMode;
+machineSetMode=function(mode){
+ if(mode===machineMode)return;
+ if(machineMode==='auto')autoFxRestore();
+ if(mode==='auto')autoFxBackup=autoFxClone();
+ autoFxPreviousSetMode(mode);
+};
+const autoFxPreviousStep=machineStep;
+machineStep=function(step,when){
+ autoFxPreviousStep(step,when);
+ if(machineMode==='auto'&&step%16===0){
+  // Schedule alongside the transport, not at the lookahead time.
+  machineSchedule(when,()=>autoFxBar(Math.floor(step/16)));
+ }
+};
 const autoPreviousClear=machineClearTimers;
 machineClearTimers=function(){autoPreviousClear();for(const [key,v] of [...pianoVoices])if(String(key).startsWith('autoPiano'))pianoSampleOff(key,v.midi);autoPhraseNumber=-1;autoLastPitch=null;songSectionIndex=-1};
 </script></body></html>
