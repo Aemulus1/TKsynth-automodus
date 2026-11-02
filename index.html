@@ -498,6 +498,39 @@ function songPhrase(phrase){
  // A section determines the harmony; phrase changes only melodic expression.
  autoPhraseShape=autoShapes[machineRand(autoShapes.length)].slice();
 }
+// v3.8: the AUTO lead changes instrument by song section, independently of the manual oscillator preset.
+// All voices use the existing mix bus and filter; SOLO and SEMI-AUTO are untouched.
+const autoLeadVoices=new Set();
+let autoLeadChoice='piano',autoLeadPreviousSection=-1;
+function autoLeadInstrument(section){
+ const name=section.name,round=Math.floor(section.index/2);
+ if(name==='INTRO'||name==='OUTRO')return 'piano';
+ if(name==='BRIDGE')return ['dreamkeys','bell','epiano'][machineRand(3)];
+ if(name==='REFREIN')return ['analog','rave','piano','epiano'][round%4];
+ return ['piano','epiano','dreamkeys','analog'][round%4];
+}
+function autoLeadSynth(midi,duration,kind){
+ if(!ctx)return;
+ const t=ctx.currentTime,voice={osc:[],g:null,ended:false};
+ const p=PRESETS[kind]||PRESETS.analog;
+ const f=ctx.createBiquadFilter(),g=ctx.createGain();voice.g=g;
+ f.type='lowpass';f.frequency.value=kind==='analog'?3300:kind==='rave'?4600:kind==='bell'?7000:4000;
+ f.Q.value=kind==='rave'?1.4:.7;
+ const level=kind==='rave'?.095:kind==='analog'?.12:kind==='bell'?.14:.16;
+ const atk=kind==='dreamkeys'?.065:.012;
+ g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(level,t+atk);
+ g.gain.setTargetAtTime(.0001,t+Math.max(atk+.05,duration-.10),.10);
+ f.connect(g);g.connect(filter);
+ const parts=p.partials|| (kind==='analog'?[[1,.65],[1.005,.35]]:[[1,1]]);
+ const total=parts.reduce((a,b)=>a+b[1],0);
+ for(const [ratio,amp] of parts){
+  const o=ctx.createOscillator(),og=ctx.createGain();o.type=p.partials?'sine':p.wave;
+  o.frequency.value=440*Math.pow(2,(midi-69)/12)*ratio;
+  og.gain.value=amp/total;o.connect(og);og.connect(f);o.start(t);o.stop(t+duration+.35);voice.osc.push(o);
+ }
+ autoLeadVoices.add(voice);
+ const id=setTimeout(()=>{machineTimers.delete(id);autoLeadVoices.delete(voice);},(duration+.45)*1000);machineTimers.add(id);
+}
 machineStep=function(currentStep,when){
  if(machineMode==='solo')return;
  const bar=Math.floor(currentStep/16),pos=currentStep%16;
@@ -507,6 +540,7 @@ machineStep=function(currentStep,when){
  }
  const section=songPosition(bar);
  if(pos===0&&section.index!==songSectionIndex)songChangeSection(section);
+ if(pos===0&&section.index!==autoLeadPreviousSection){autoLeadChoice=autoLeadInstrument(section);autoLeadPreviousSection=section.index;}
  const phrase=Math.floor(bar/4);
  if(pos===0&&phrase!==autoPhraseNumber)songPhrase(phrase);
  const slots=[2,4,6,8,10,12,14],slot=slots.indexOf(pos);
@@ -527,11 +561,25 @@ machineStep=function(currentStep,when){
  const note=midi,key='autoPiano'+currentStep;
  const beat=60/Math.max(50,Math.min(220,+$('bpm').value||120));
  const duration=beat*(chorus?(slot%3===0?1.5:.8):(slot%3===0?1.7:.7));
- machineSchedule(when,()=>{pianoSampleOn(note,key);const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(key,note)},duration*1000);machineTimers.add(id)});
+ machineSchedule(when,()=>{
+  // Occasional piano response in a synth-led chorus; no duplicate lead on every note.
+  const instrument=autoLeadChoice;
+  if(instrument==='piano'){
+   pianoSampleOn(note,key);
+   const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(key,note)},duration*1000);machineTimers.add(id);
+  }else{
+   autoLeadSynth(note,duration,instrument);
+   if(chorus&&slot===6&&Math.random()<.48){
+    const replyKey=key+'Reply',replyNote=note-12;
+    pianoSampleOn(replyNote,replyKey);
+    const id=setTimeout(()=>{machineTimers.delete(id);pianoSampleOff(replyKey,replyNote)},duration*.8*1000);machineTimers.add(id);
+   }
+  }
+ });
 };
 const priorSongArrange=machineArrange;
 machineArrange=function(){priorSongArrange();songProgressions=(machineQuality==='minor'?songMinor:songMajor).map(p=>p.slice());
- songMakeHooks();songSectionIndex=-1;autoPhraseNumber=-1;autoLastPitch=null;
+ songMakeHooks();songSectionIndex=-1;autoPhraseNumber=-1;autoLastPitch=null;autoLeadPreviousSection=-1;autoLeadChoice='piano';
  $('preset').value='grand';$('preset').dispatchEvent(new Event('change'));
  $('bassFollowPad').checked=true;$('padBars').value='2';
 };
