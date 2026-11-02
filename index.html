@@ -509,27 +509,62 @@ function autoLeadInstrument(section){
  if(name==='REFREIN')return ['analog','rave','piano','epiano'][round%4];
  return ['piano','epiano','dreamkeys','analog'][round%4];
 }
+// v3.9: expressive, layered PSR-inspired lead synthesis (original sounds, no Yamaha samples).
+// Each voice has its own filter envelope, slow vibrato, stereo movement and subtle echo.
 function autoLeadSynth(midi,duration,kind){
  if(!ctx)return;
  const t=ctx.currentTime,voice={osc:[],g:null,ended:false};
- const p=PRESETS[kind]||PRESETS.analog;
+ const freq=440*Math.pow(2,(midi-69)/12);
+ const profiles={
+  analog:{wave:'sawtooth',level:.125,attack:.028,cut:2500,peak:6700,q:1.0,vibrato:5.1,depth:9,detune:7,echo:.12},
+  rave:{wave:'sawtooth',level:.105,attack:.012,cut:3400,peak:9200,q:1.25,vibrato:5.7,depth:7,detune:12,echo:.16},
+  dreamkeys:{wave:'triangle',level:.14,attack:.09,cut:2800,peak:5100,q:.55,vibrato:4.1,depth:4,detune:5,echo:.21},
+  epiano:{wave:'sine',level:.17,attack:.008,cut:3600,peak:6600,q:.5,vibrato:4.6,depth:3,detune:2,echo:.17},
+  bell:{wave:'sine',level:.12,attack:.005,cut:5200,peak:10000,q:.65,vibrato:5.4,depth:2,detune:2,echo:.23}
+ };
+ const p=profiles[kind]||profiles.analog;
  const f=ctx.createBiquadFilter(),g=ctx.createGain();voice.g=g;
- f.type='lowpass';f.frequency.value=kind==='analog'?3300:kind==='rave'?4600:kind==='bell'?7000:4000;
- f.Q.value=kind==='rave'?1.4:.7;
- const level=kind==='rave'?.095:kind==='analog'?.12:kind==='bell'?.14:.16;
- const atk=kind==='dreamkeys'?.065:.012;
- g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(level,t+atk);
- g.gain.setTargetAtTime(.0001,t+Math.max(atk+.05,duration-.10),.10);
- f.connect(g);g.connect(filter);
- const parts=p.partials|| (kind==='analog'?[[1,.65],[1.005,.35]]:[[1,1]]);
- const total=parts.reduce((a,b)=>a+b[1],0);
- for(const [ratio,amp] of parts){
-  const o=ctx.createOscillator(),og=ctx.createGain();o.type=p.partials?'sine':p.wave;
-  o.frequency.value=440*Math.pow(2,(midi-69)/12)*ratio;
-  og.gain.value=amp/total;o.connect(og);og.connect(f);o.start(t);o.stop(t+duration+.35);voice.osc.push(o);
+ f.type='lowpass';f.Q.value=p.q;
+ const attack=p.attack*(.85+Math.random()*.3),hold=Math.max(attack+.07,duration-.14);
+ f.frequency.setValueAtTime(p.cut,t);
+ f.frequency.linearRampToValueAtTime(p.peak*(.87+Math.random()*.25),t+attack+.045);
+ f.frequency.setTargetAtTime(p.cut*.76,t+attack+.065,.23);
+ g.gain.setValueAtTime(.0001,t);
+ g.gain.linearRampToValueAtTime(p.level*(.91+Math.random()*.18),t+attack);
+ g.gain.setTargetAtTime(p.level*.69,t+attack+.08,.3);
+ g.gain.setTargetAtTime(.0001,t+hold,.095);
+ // Two detuned oscillators, plus a quiet harmonic for a richer timbre.
+ const specs=kind==='bell'?[[1,.75,'sine'],[2.76,.18,'sine'],[5.41,.07,'sine']]:
+   kind==='epiano'?[[1,.78,'sine'],[2,.18,'sine'],[3,.04,'sine']]:
+   [[1,.49,p.wave],[1,.42,p.wave],[2,.09,'sine']];
+ const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
+ lfo.type='sine';lfo.frequency.value=p.vibrato*(.95+Math.random()*.1);
+ lfoGain.gain.setValueAtTime(0,t);
+ lfoGain.gain.linearRampToValueAtTime(p.depth,t+.3);
+ lfo.connect(lfoGain);
+ specs.forEach(([ratio,amp,wave],i)=>{
+  const o=ctx.createOscillator(),og=ctx.createGain();
+  o.type=wave;o.frequency.value=freq*ratio;
+  o.detune.value=i===0?-p.detune:i===1?p.detune:0;
+  og.gain.value=amp;o.connect(og);og.connect(f);
+  if(i<2)lfoGain.connect(o.detune);
+  o.start(t);o.stop(t+duration+.38);voice.osc.push(o);
+ });
+ lfo.start(t);lfo.stop(t+duration+.38);
+ let destination=filter;
+ if(typeof ctx.createStereoPanner==='function'){
+  const pan=ctx.createStereoPanner();pan.pan.value=(Math.random()-.5)*.28;
+  f.connect(g);g.connect(pan);pan.connect(filter);destination=null;
  }
+ if(destination){f.connect(g);g.connect(destination)}
+ // A short, restrained echo on the lead itself: musical presence, not a washed-out sound.
+ const echo=ctx.createDelay(.6),echoGain=ctx.createGain();
+ echo.delayTime.value=.22;echoGain.gain.value=p.echo;
+ g.connect(echo);echo.connect(echoGain);echoGain.connect(filter);
  autoLeadVoices.add(voice);
- const id=setTimeout(()=>{machineTimers.delete(id);autoLeadVoices.delete(voice);},(duration+.45)*1000);machineTimers.add(id);
+ const id=setTimeout(()=>{machineTimers.delete(id);autoLeadVoices.delete(voice);
+  try{lfo.disconnect();lfoGain.disconnect();echo.disconnect();echoGain.disconnect()}catch(e){}
+ },(duration+.48)*1000);machineTimers.add(id);
 }
 machineStep=function(currentStep,when){
  if(machineMode==='solo')return;
