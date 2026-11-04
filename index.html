@@ -907,7 +907,7 @@ machineStep=function(step,when){
  const chance=name==='REFREIN'?.72:name==='SOLO'?.88:name==='BRIDGE'?.68:
               name==='PRE-REFREIN'?.42:name.startsWith('STROFE')?.25:.30;
  const phraseSeed=((phrase*37+section.index*19+Math.max(0,model)*13+bandSongCount*11)%101)/101;
- if(phraseSeed>=chance)return;
+ if(!bandCast.secondary||phraseSeed>=chance*bandCast.duetDensity)return;
  // Countermelody has its own sparse rhythm, deliberately offset from the main motif.
  // v6.0: call-and-response. The first bar belongs to the main lead;
  // the second bar gives a second instrument room to answer.
@@ -928,7 +928,7 @@ machineStep=function(step,when){
  const idx=answerIndex===entries.length-1?0:Math.abs(callDegree+section.index+phrase)%choices.length;
  let midi=root+24+choices[idx];
  // Stay in a complementary, modest register; avoid the clean guitar's high notes.
- const kind=duetInstrument(section),lo=kind==='guitar'?55:57,hi=kind==='guitar'?67:74;
+ const kind=duetInstrument(section);if(!kind)return;const lo=kind==='guitar'?55:57,hi=kind==='guitar'?67:74;
  while(midi>hi)midi-=12;
  while(midi<lo)midi+=12;
  if(duetLastPitch!==null&&Math.abs(midi-duetLastPitch)>9){
@@ -1097,5 +1097,36 @@ machineStep=function(step,when){
  }
  return introPreviousStep(step,when);
 };
+
+
+// v6.1 — per-song band casting. The sax is reserved for Jazz AABA.
+// Stable section roles replace compulsory piano/guitar/sax rotation.
+let bandCast={primary:'piano',secondary:null,duetDensity:0};
+const castPreviousChoose=bandChooseModel;
+bandChooseModel=function(){
+ castPreviousChoose();
+ const jazz=bandModelIndex===2,ambient=bandModelIndex===3,electronic=bandModelIndex===4;
+ const pick=a=>a[Math.floor(Math.random()*a.length)];
+ if(jazz){bandCast={primary:pick(['sax','piano','sax','guitar']),secondary:pick(['piano','guitar']),duetDensity:.75};}
+ else if(ambient){bandCast={primary:pick(['piano','guitar']),secondary:Math.random()<.38?'guitar':null,duetDensity:.35};}
+ else if(electronic){bandCast={primary:pick(['piano','guitar']),secondary:Math.random()<.22?'piano':null,duetDensity:.25};}
+ else {const primary=pick(['piano','guitar']);bandCast={primary,secondary:Math.random()<.55?(primary==='piano'?'guitar':'piano'):null,duetDensity:.55};}
+ bandModelLabel.textContent+=' · LEAD '+bandCast.primary.toUpperCase()+(bandCast.secondary?' + '+bandCast.secondary.toUpperCase():' SOLO');
+};
+const castPreviousLead=autoLeadInstrument;
+autoLeadInstrument=function(section){
+ if(section.name==='INTRO')return castPreviousLead(section);
+ // Main lead remains the same throughout the song, including chorus and bridge.
+ return bandCast.primary;
+};
+duetInstrument=function(section){
+ if(section.name==='INTRO'||section.name==='OUTRO'||!bandCast.secondary)return null;
+ // Never force a second lead into the same role as the primary.
+ return bandCast.secondary===autoLeadInstrument(section)?null:bandCast.secondary;
+};
+// Rhythm-aware duet scheduling: no automatic alternation and fewer competing accents.
+// Preserve the existing question/answer pitches and timing in v6.0.
+const castPreviousStep=machineStep;
+machineStep=function(step,when){return castPreviousStep(step,when)};
 
 </script></body></html>
