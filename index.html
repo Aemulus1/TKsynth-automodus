@@ -14,7 +14,7 @@
  .drumbanks{display:flex;gap:6px;margin:9px 0}.drumbanks button{flex:1;padding:7px 4px;font-size:10px}.drumbanks button.active{background:#855f36;border-color:#edb46b}.pads{grid-template-columns:repeat(3,minmax(0,1fr))}.pad{font-size:10px;min-height:46px}.seqgrid{overflow-x:auto}.seqgrid .rowlabel{font-size:10px}.seqbank{white-space:nowrap}
 .bassstep{padding:0!important;min-height:62px!important;overflow:hidden;display:flex;flex-direction:column}.bass-half{display:flex;align-items:center;justify-content:center;width:100%;flex:1;min-height:30px;padding:3px 1px;border:0;border-radius:0;color:#f4f4f4;font-size:10px;cursor:pointer;background:transparent;touch-action:manipulation}.bass-duration{border-bottom:1px solid #ffffff55;font-weight:700;background:#202c36}.bass-pitch{font-weight:700;background:#354350}.bassstep.short .bass-duration{background:#76512b}.bassstep.long .bass-duration{background:#286e55}.bass-half:active{filter:brightness(1.35)}</style><style>
 .padseq{margin:12px 0;padding:14px;background:#292f39;border:1px solid #67717d;border-radius:9px}.padseq h2{color:#e6b16b;margin:0}.padseq-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}.padseq label{font-size:12px;color:#e0e4e7}.padseq select{padding:7px;background:#151a20;color:white;border:1px solid #65717a;border-radius:5px}.padseq input[type=range]{accent-color:#dfa55d;vertical-align:middle;max-width:130px}.padchords{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.padchord{padding:10px;background:#36404b;border:1px solid #596878;border-radius:7px;display:flex;flex-direction:column;gap:7px;min-width:0}.padchord.playing{border-color:#9be2b8;box-shadow:inset 0 0 0 1px #9be2b8}.padchord strong{color:#e6b16b;font-size:12px}.padchord select{width:100%;min-width:0}@media(max-width:580px){.padchords{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style><style>.recorder{margin:12px 0;padding:14px;background:#292f39;border:1px solid #67717d;border-radius:9px}.recorder h2{color:#e6b16b;margin:0}.reccontrols{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}.reccontrols button:disabled{opacity:.4;cursor:not-allowed}.recclock{font:24px monospace;color:#9be2b8;min-width:80px}.recstatus{font-size:12px;color:#bfcbd3}.recorder audio{width:100%;margin-top:10px}.recactive{background:#923b40!important;border-color:#f38b91!important}</style><style>.machine{margin:12px 0;padding:15px;background:#25343b;border:1px solid #b58b54;border-radius:10px}.machine h2{margin:0;color:#e7b276;font-size:15px}.machine-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.machine-buttons button{flex:1;min-width:90px}.machine-buttons button.active{background:#32745f;border-color:#a3e4bf}.machine-status{color:#9be2b8;font-size:12px}.machine p{color:#bdcbd2;font-size:12px}</style></head><body><main class="shell"><header><div><h1>TK SYNTH STUDIO</h1><small>TEEKAY & OMNIA · 2026 · v5.4 · LEAD DUETS</small></div><div><span id="status">● Audio klaar na eerste toets</span></div></header><section class="machine" id="machine"><h2>00 · TK SYNTH MACHINE · COMPONIST</h2><div class="machine-buttons"><button type="button" data-mode="auto">✦ AUTO</button><button type="button" data-mode="semi">♫ SEMI-AUTO</button><button type="button" data-mode="solo" class="active">♬ SOLO</button><button type="button" id="machineStopAuto">■ STOP AUTO</button></div><div class="machine-status" id="machineStatus">SOLO · Handmatige bediening, alle sequencers blijven beschikbaar.</div><p>AUTO maakt een nieuwe compositie met akkoordwissels, ritmes en melodieën. SEMI-AUTO volgt de toetsen die je speelt. SOLO schakelt de componist uit. PLAY/STOP bedient het transport; REC neemt de mix op.</p></section><section class="panels"><article class="panel"><h2>01 · LEADING INSTRUMENTS</h2><div class="preset-select"><label for="preset">LEADING INSTRUMENTS · OPNAMES</label><select id="preset"><option value="grand">Grand Piano · opgenomen samples</option><option value="clean-guitar">Clean Electric Guitar · echte opnames</option><option value="tenor-sax">Tenor Saxophone · echte opnames</option></select></div><div class="display" id="oscDisplay">SAMPLE PIANO · C4</div><div class="controls"><label class="control">WAVE<select id="wave"><option value="sawtooth">Saw</option><option value="sine">Sine</option><option value="square">Square</option><option value="triangle">Triangle</option></select></label><label class="control">OCTAVE<select id="oct"><option value="-1">-1</option><option value="0" selected>0</option><option value="1">+1</option></select></label><label class="control">ATTACK<input id="attack" type="range" min="0.005" max="1.5" step="0.005" value="0.02"><span class="value" id="attackV">0.02 s</span></label><label class="control">RELEASE<input id="release" type="range" min="0.05" max="2.5" step="0.05" value="0.35"><span class="value" id="releaseV">0.35 s</span></label></div></article><article class="panel"><h2>02 · FILTER</h2><div class="display">LOW PASS · TONE</div><div class="controls"><label class="control">CUTOFF<input id="cutoff" type="range" min="150" max="12000" value="5500"><span class="value" id="cutoffV">5500 Hz</span></label><label class="control">RESONANCE<input id="res" type="range" min="0.1" max="16" step="0.1" value="0.7"><span class="value" id="resV">0.7</span></label><label class="control">FILTER ENV<input id="filterEnv" type="range" min="0" max="100" step="1" value="0"><span class="value" id="filterEnvV">0%</span></label><label class="control">VOLUME<input id="volume" type="range" min="0" max="1" step="0.01" value="0.55"><span class="value" id="volumeV">55%</span></label></div></article><article class="panel fxrack"><h2>03 · FX RACK</h2><div class="display">FX01–FX04 · MODULAIR</div><div class="fxbuttons"><button type="button" class="fxpick" data-fx="01"><b>FX01</b><span>DELAY</span><i id="fxLed01">OFF</i></button><button type="button" class="fxpick" data-fx="02"><b>FX02</b><span>REVERB</span><i id="fxLed02">OFF</i></button><button type="button" class="fxpick" data-fx="03"><b>FX03</b><span>CHORUS</span><i id="fxLed03">OFF</i></button><button type="button" class="fxpick" data-fx="04"><b>FX04</b><span>PHASER</span><i id="fxLed04">OFF</i></button></div><div id="fxEditor" class="fxeditor" hidden></div></article><article class="panel"><h2>04 · RHYTHM</h2><div class="display">DRUM MACHINE · 16 STEPS</div><div class="controls"><label class="control">DRUM VOLUME<input id="drumVolume" type="range" min="0" max="1" step="0.01" value="0.75"><span class="value" id="drumVolumeV">75%</span></label></div><div class="drumbanks"><button type="button" class="drumbank active" data-bank="0">PADS 01–06</button><button type="button" class="drumbank" data-bank="1">PADS 07–12</button></div><div class="pads" id="drumPads"></div><p style="font-size:11px;color:#b6c0c8">Klik de pads om te spelen. Programmeer hieronder het ritme.</p></article></section><section class="arpbox"><div class="arphead"><h2>05 · ARPEGGIATOR</h2><label style="color:#9be2b8"><input type="checkbox" id="arpEnable"> ARP ON</label></div><div class="arpcontrols"><label>PRESET <select id="arpPreset"><option value="custom">CUSTOM</option><option value="twostep">2-Step</option><option value="house">House</option><option value="techno">Techno</option><option value="waltz">Waltz (3/4 feel)</option><option value="hiphop">Hip-Hop</option><option value="trance">Trance</option><option value="ambient">Ambient</option><option value="acid">Acid</option></select></label><label>STEPS <select id="arpSteps"><option>2</option><option selected>4</option><option>6</option><option>8</option><option>16</option></select></label><label>AKKOORD <select id="arpMode"><option value="major">MAJEUR</option><option value="minor">MINEUR</option></select></label><label>RICHTING <select id="arpDir"><option value="up">UP</option><option value="down">DOWN</option><option value="bounce">UP / DOWN</option><option value="random">RANDOM</option></select></label><label>SNELHEID <select id="arpRate"><option value="1">1/4</option><option value="2" selected>1/8</option><option value="4">1/16</option><option value="8">1/32</option></select></label><label>ARP SHIFT <input id="arpShift" type="range" min="0" max="4" step="1" value="0" style="width:110px;vertical-align:middle;accent-color:#e6b16b"><span id="arpShiftV" style="color:#9be2b8">0</span></label><label><input type="checkbox" id="arpHold"> HOLD</label><label>ARP CUTOFF <input id="arpCutoff" type="range" min="150" max="12000" step="50" value="5500" style="width:115px;vertical-align:middle;accent-color:#e6b16b"><span id="arpCutoffV" style="color:#9be2b8">5500 Hz</span></label><label style="color:#9be2b8"><input type="checkbox" id="arpLfoOn"> LFO ON</label><label>LFO SPEED <input id="arpLfoRate" type="range" min="0.05" max="12" step="0.05" value="1" style="width:105px;vertical-align:middle;accent-color:#e6b16b"><span id="arpLfoRateV" style="color:#9be2b8">1.00 Hz</span></label><label>LFO DEPTH <input id="arpLfoDepth" type="range" min="0" max="100" step="1" value="55" style="width:100px;vertical-align:middle;accent-color:#e6b16b"><span id="arpLfoDepthV" style="color:#9be2b8">55%</span></label><button id="arpReset">RESET PATROON</button></div><div id="arpGrid" class="arpsteps"></div><p class="arpnote">Kies een preset of programmeer zelf (CUSTOM). Waltz geeft een 3/4-gevoel binnen de bestaande 4/4-klok. Klik een stap om de toonhoogte te wijzigen: 0 → +12 → +7 → +5 → -12 → rust. MAJEUR / MINEUR stemt alle ARP-noten af op het gekozen drieklankakkoord. De ARP deelt de grondtoon met de bas; VOLG KEYBOARD bepaalt of de grondtoon de gespeelde toets of C is. ARP synchroniseert met de drum-BPM. ARP SHIFT verschuift de noten in achtsten van een maat (1/8 maat = een halve beat), zonder de drums te verschuiven.</p></section><section class="seq"><div class="seqhead"><h2>06 · STEP SEQUENCER</h2><span style="font-size:12px;color:#83d9a9">16 stappen · 4/4</span></div><div class="drumbanks"><button type="button" class="seqbank active" data-bank="0">TRACKS 01–06</button><button type="button" class="seqbank" data-bank="1">TRACKS 07–12</button></div><div id="seqRows"></div><div class="toolbar"><button id="play">▶ PLAY</button><button id="stop">■ STOP</button><button id="clear">CLEAR</button><label>BPM <input id="bpm" type="number" min="50" max="220" value="120"></label><label>Patroon <select id="bars"><option value="1">1 maat</option><option value="2">2 maten</option><option value="3">3 maten</option><option value="4">4 maten</option></select></label></div><small>De sequencer herhaalt het patroon. Maatlengte is voorlopig gezamenlijk; onafhankelijke lengtes komen in een volgende versie.</small></section><section class="bassbox"><div class="arphead"><h2>07 · BASS SEQUENCER</h2><label style="color:#9be2b8"><input id="bassEnable" type="checkbox" checked> BASS ON</label></div><div class="basscontrols"><label>KLANK <select id="bassSound"><option value="bassguitar">Bass Guitar</option><option value="acid">Acid 303</option><option value="sub">Sub Bass</option><option value="rubber">Rubber Bass</option><option value="dirty">Dirty Bass</option></select></label><label>LENGTE <select id="bassBars"><option value="1" selected>1 maat</option><option value="2">2 maten</option><option value="3">3 maten</option><option value="4">4 maten</option></select></label><label style="color:#9be2b8"><input id="bassFollow" type="checkbox" checked> VOLG KEYBOARD</label><label style="color:#9be2b8"><input id="bassFollowPad" type="checkbox" checked> VOLG PAD-AKKOORDEN</label><span id="bassRootLabel" style="font-size:11px;color:#e6b16b">ROOT: C</span><label>NOOTLENGTE <select id="bassGate"><option value=".4">Kort</option><option value=".75" selected>Normaal</option><option value=".95">Lang</option></select></label><label style="display:flex;flex-direction:column;gap:7px;background:#303b48;border:1px solid #d4a15e;border-radius:9px;padding:10px;min-width:180px"><strong style="color:#e6b16b;font-size:12px">BASS VOLUME · INDEPENDENT</strong><input id="bassVolume" type="range" min="0" max="1" step="0.01" value="0.75" style="width:100%;accent-color:#e6b16b;touch-action:pan-y"><span id="bassVolumeV" style="color:#9be2b8;font-weight:bold">75%</span></label><button id="bassClear" type="button">CLEAR BASS</button></div><div class="basscontrols" style="background:#202731;padding:10px;border-radius:8px;border:1px solid #586675"><strong style="color:#e6b16b;font-size:12px">BASS FILTER</strong><label>CUTOFF <input id="bassCutoff" type="range" min="80" max="8000" step="10" value="4000" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassCutoffV">4000 Hz</span></label><label>RESONANCE <input id="bassResonance" type="range" min="0" max="95" step="1" value="20" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassResonanceV">20%</span></label><label>FILTER ENV <input id="bassEnv" type="range" min="0" max="100" step="1" value="0" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassEnvV">0%</span></label><label style="color:#9be2b8"><input id="bassLfoOn" type="checkbox"> LFO ON</label><label>LFO SPEED <input id="bassLfoRate" type="range" min="0.05" max="12" step="0.05" value="1" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassLfoRateV">1.00 Hz</span></label></div><div id="bassGrid"></div><p class="arpnote">Tik op een stap: kort → lang → rust. Houd een stap ingedrukt (of rechtsklik) om de toonhoogte te kiezen. Shift+klik schakelt accent in of uit. VOLG KEYBOARD transponeert de baslijn naar de laatst gespeelde toets. Iedere maat begint precies op de centrale BPM-klok. De bas heeft een eigen versterkte uitgang, onafhankelijk van het keyboard en het keyboardfilter.</p></section><section class="padseq" id="padSection"><div class="arphead"><h2>08 · PAD SEQUENCER</h2><label style="color:#9be2b8"><input type="checkbox" id="padEnable"> PAD ON</label></div><div class="padseq-controls"><label><input type="checkbox" id="padChords" checked> AKKOORDEN AAN</label><label>KLANK <select id="padSound"><option value="warm">Warm Pad</option><option value="space">Space Pad</option><option value="strings">Dark Strings</option><option value="dreamscape">Dreamscape</option></select></label><label>DUUR <select id="padBars"><option value="1">1 maat</option><option value="2" selected>2 maten</option><option value="4">4 maten</option></select></label><label>VOLUME <input type="range" id="padVolume" min="0" max="1" step="0.01" value="0.28"><span id="padVolumeV">28%</span></label><label>CUTOFF <input type="range" id="padCutoff" min="150" max="12000" step="50" value="3500"><span id="padCutoffV">3500 Hz</span></label><label>ATTACK <input type="range" id="padAttack" min="0.02" max="3" step="0.02" value="0.8"><span id="padAttackV">0.80 s</span></label><label>RELEASE <input type="range" id="padRelease" min="0.1" max="5" step="0.1" value="2"><span id="padReleaseV">2.0 s</span></label><label><input type="checkbox" id="padLfoOn"> LFO ON</label><label>LFO SPEED <input type="range" id="padLfoRate" min="0.05" max="8" step="0.05" value="0.4"><span id="padLfoRateV">0.40 Hz</span></label><label>LFO DEPTH <input type="range" id="padLfoDepth" min="0" max="100" value="35"><span id="padLfoDepthV">35%</span></label></div><div class="padchords" id="padChordsGrid"></div><p class="arpnote">Vier stappen, elk 1, 2 of 4 maten. Met AKKOORDEN UIT klinkt enkel de gekozen grondtoon. De PAD heeft een eigen volume, filter en LFO; alle andere modules blijven onafhankelijk.</p></section><section class="recorder" id="recorder"><div class="arphead"><h2>09 · RECORDER</h2><span class="recstatus" id="recStatus">Klaar om de synthmix op te nemen</span></div><div class="reccontrols"><button type="button" id="recStart">● REC</button><button type="button" id="recStop" disabled>■ STOP</button><button type="button" id="recPlay" disabled>▶ PLAY</button><button type="button" id="recSave" disabled>↓ SAVE</button><span class="recclock" id="recClock">00:00</span></div><audio id="recAudio" controls hidden></audio><p class="arpnote">Neemt de volledige synthmix digitaal op, zonder microfoon. SAVE bewaart de opname op je eigen toestel; niets wordt naar GitHub verzonden.</p></section><div class="keyboard-wrap"><div id="keyboard" class="keyboard"></div></div><div class="foot">Speel met muis of aanraking · Computerklavier: A W S E D F T G Y H U J K · By Teekay & Omnia 2026</div></main><script>
+</style><style>.recorder{margin:12px 0;padding:14px;background:#292f39;border:1px solid #67717d;border-radius:9px}.recorder h2{color:#e6b16b;margin:0}.reccontrols{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}.reccontrols button:disabled{opacity:.4;cursor:not-allowed}.recclock{font:24px monospace;color:#9be2b8;min-width:80px}.recstatus{font-size:12px;color:#bfcbd3}.recorder audio{width:100%;margin-top:10px}.recactive{background:#923b40!important;border-color:#f38b91!important}</style><style>.machine{margin:12px 0;padding:15px;background:#25343b;border:1px solid #b58b54;border-radius:10px}.machine h2{margin:0;color:#e7b276;font-size:15px}.machine-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.machine-buttons button{flex:1;min-width:90px}.machine-buttons button.active{background:#32745f;border-color:#a3e4bf}.machine-status{color:#9be2b8;font-size:12px}.machine p{color:#bdcbd2;font-size:12px}</style></head><body><main class="shell"><header><div><h1>TK SYNTH STUDIO</h1><small>TEEKAY & OMNIA · 2026 · v6.0 · MUZIKALE VRAAG & ANTWOORD</small></div><div><span id="status">● Audio klaar na eerste toets</span></div></header><section class="machine" id="machine"><h2>00 · TK SYNTH MACHINE · COMPONIST</h2><div class="machine-buttons"><button type="button" data-mode="auto">✦ AUTO</button><button type="button" data-mode="semi">♫ SEMI-AUTO</button><button type="button" data-mode="solo" class="active">♬ SOLO</button><button type="button" id="machineStopAuto">■ STOP AUTO</button></div><div class="machine-status" id="machineStatus">SOLO · Handmatige bediening, alle sequencers blijven beschikbaar.</div><p>AUTO maakt een nieuwe compositie met akkoordwissels, ritmes en melodieën. SEMI-AUTO volgt de toetsen die je speelt. SOLO schakelt de componist uit. PLAY/STOP bedient het transport; REC neemt de mix op.</p></section><section class="panels"><article class="panel"><h2>01 · LEADING INSTRUMENTS</h2><div class="preset-select"><label for="preset">LEADING INSTRUMENTS · OPNAMES</label><select id="preset"><option value="grand">Grand Piano · opgenomen samples</option><option value="clean-guitar">Clean Electric Guitar · echte opnames</option><option value="tenor-sax">Tenor Saxophone · echte opnames</option></select></div><div class="display" id="oscDisplay">SAMPLE PIANO · C4</div><div class="controls"><label class="control">WAVE<select id="wave"><option value="sawtooth">Saw</option><option value="sine">Sine</option><option value="square">Square</option><option value="triangle">Triangle</option></select></label><label class="control">OCTAVE<select id="oct"><option value="-1">-1</option><option value="0" selected>0</option><option value="1">+1</option></select></label><label class="control">ATTACK<input id="attack" type="range" min="0.005" max="1.5" step="0.005" value="0.02"><span class="value" id="attackV">0.02 s</span></label><label class="control">RELEASE<input id="release" type="range" min="0.05" max="2.5" step="0.05" value="0.35"><span class="value" id="releaseV">0.35 s</span></label></div></article><article class="panel"><h2>02 · FILTER</h2><div class="display">LOW PASS · TONE</div><div class="controls"><label class="control">CUTOFF<input id="cutoff" type="range" min="150" max="12000" value="5500"><span class="value" id="cutoffV">5500 Hz</span></label><label class="control">RESONANCE<input id="res" type="range" min="0.1" max="16" step="0.1" value="0.7"><span class="value" id="resV">0.7</span></label><label class="control">FILTER ENV<input id="filterEnv" type="range" min="0" max="100" step="1" value="0"><span class="value" id="filterEnvV">0%</span></label><label class="control">VOLUME<input id="volume" type="range" min="0" max="1" step="0.01" value="0.55"><span class="value" id="volumeV">55%</span></label></div></article><article class="panel fxrack"><h2>03 · FX RACK</h2><div class="display">FX01–FX04 · MODULAIR</div><div class="fxbuttons"><button type="button" class="fxpick" data-fx="01"><b>FX01</b><span>DELAY</span><i id="fxLed01">OFF</i></button><button type="button" class="fxpick" data-fx="02"><b>FX02</b><span>REVERB</span><i id="fxLed02">OFF</i></button><button type="button" class="fxpick" data-fx="03"><b>FX03</b><span>CHORUS</span><i id="fxLed03">OFF</i></button><button type="button" class="fxpick" data-fx="04"><b>FX04</b><span>PHASER</span><i id="fxLed04">OFF</i></button></div><div id="fxEditor" class="fxeditor" hidden></div></article><article class="panel"><h2>04 · RHYTHM</h2><div class="display">DRUM MACHINE · 16 STEPS</div><div class="controls"><label class="control">DRUM VOLUME<input id="drumVolume" type="range" min="0" max="1" step="0.01" value="0.75"><span class="value" id="drumVolumeV">75%</span></label></div><div class="drumbanks"><button type="button" class="drumbank active" data-bank="0">PADS 01–06</button><button type="button" class="drumbank" data-bank="1">PADS 07–12</button></div><div class="pads" id="drumPads"></div><p style="font-size:11px;color:#b6c0c8">Klik de pads om te spelen. Programmeer hieronder het ritme.</p></article></section><section class="arpbox"><div class="arphead"><h2>05 · ARPEGGIATOR</h2><label style="color:#9be2b8"><input type="checkbox" id="arpEnable"> ARP ON</label></div><div class="arpcontrols"><label>PRESET <select id="arpPreset"><option value="custom">CUSTOM</option><option value="twostep">2-Step</option><option value="house">House</option><option value="techno">Techno</option><option value="waltz">Waltz (3/4 feel)</option><option value="hiphop">Hip-Hop</option><option value="trance">Trance</option><option value="ambient">Ambient</option><option value="acid">Acid</option></select></label><label>STEPS <select id="arpSteps"><option>2</option><option selected>4</option><option>6</option><option>8</option><option>16</option></select></label><label>AKKOORD <select id="arpMode"><option value="major">MAJEUR</option><option value="minor">MINEUR</option></select></label><label>RICHTING <select id="arpDir"><option value="up">UP</option><option value="down">DOWN</option><option value="bounce">UP / DOWN</option><option value="random">RANDOM</option></select></label><label>SNELHEID <select id="arpRate"><option value="1">1/4</option><option value="2" selected>1/8</option><option value="4">1/16</option><option value="8">1/32</option></select></label><label>ARP SHIFT <input id="arpShift" type="range" min="0" max="4" step="1" value="0" style="width:110px;vertical-align:middle;accent-color:#e6b16b"><span id="arpShiftV" style="color:#9be2b8">0</span></label><label><input type="checkbox" id="arpHold"> HOLD</label><label>ARP CUTOFF <input id="arpCutoff" type="range" min="150" max="12000" step="50" value="5500" style="width:115px;vertical-align:middle;accent-color:#e6b16b"><span id="arpCutoffV" style="color:#9be2b8">5500 Hz</span></label><label style="color:#9be2b8"><input type="checkbox" id="arpLfoOn"> LFO ON</label><label>LFO SPEED <input id="arpLfoRate" type="range" min="0.05" max="12" step="0.05" value="1" style="width:105px;vertical-align:middle;accent-color:#e6b16b"><span id="arpLfoRateV" style="color:#9be2b8">1.00 Hz</span></label><label>LFO DEPTH <input id="arpLfoDepth" type="range" min="0" max="100" step="1" value="55" style="width:100px;vertical-align:middle;accent-color:#e6b16b"><span id="arpLfoDepthV" style="color:#9be2b8">55%</span></label><button id="arpReset">RESET PATROON</button></div><div id="arpGrid" class="arpsteps"></div><p class="arpnote">Kies een preset of programmeer zelf (CUSTOM). Waltz geeft een 3/4-gevoel binnen de bestaande 4/4-klok. Klik een stap om de toonhoogte te wijzigen: 0 → +12 → +7 → +5 → -12 → rust. MAJEUR / MINEUR stemt alle ARP-noten af op het gekozen drieklankakkoord. De ARP deelt de grondtoon met de bas; VOLG KEYBOARD bepaalt of de grondtoon de gespeelde toets of C is. ARP synchroniseert met de drum-BPM. ARP SHIFT verschuift de noten in achtsten van een maat (1/8 maat = een halve beat), zonder de drums te verschuiven.</p></section><section class="seq"><div class="seqhead"><h2>06 · STEP SEQUENCER</h2><span style="font-size:12px;color:#83d9a9">16 stappen · 4/4</span></div><div class="drumbanks"><button type="button" class="seqbank active" data-bank="0">TRACKS 01–06</button><button type="button" class="seqbank" data-bank="1">TRACKS 07–12</button></div><div id="seqRows"></div><div class="toolbar"><button id="play">▶ PLAY</button><button id="stop">■ STOP</button><button id="clear">CLEAR</button><label>BPM <input id="bpm" type="number" min="50" max="220" value="120"></label><label>Patroon <select id="bars"><option value="1">1 maat</option><option value="2">2 maten</option><option value="3">3 maten</option><option value="4">4 maten</option></select></label></div><small>De sequencer herhaalt het patroon. Maatlengte is voorlopig gezamenlijk; onafhankelijke lengtes komen in een volgende versie.</small></section><section class="bassbox"><div class="arphead"><h2>07 · BASS SEQUENCER</h2><label style="color:#9be2b8"><input id="bassEnable" type="checkbox" checked> BASS ON</label></div><div class="basscontrols"><label>KLANK <select id="bassSound"><option value="bassguitar">Bass Guitar</option><option value="acid">Acid 303</option><option value="sub">Sub Bass</option><option value="rubber">Rubber Bass</option><option value="dirty">Dirty Bass</option></select></label><label>LENGTE <select id="bassBars"><option value="1" selected>1 maat</option><option value="2">2 maten</option><option value="3">3 maten</option><option value="4">4 maten</option></select></label><label style="color:#9be2b8"><input id="bassFollow" type="checkbox" checked> VOLG KEYBOARD</label><label style="color:#9be2b8"><input id="bassFollowPad" type="checkbox" checked> VOLG PAD-AKKOORDEN</label><span id="bassRootLabel" style="font-size:11px;color:#e6b16b">ROOT: C</span><label>NOOTLENGTE <select id="bassGate"><option value=".4">Kort</option><option value=".75" selected>Normaal</option><option value=".95">Lang</option></select></label><label style="display:flex;flex-direction:column;gap:7px;background:#303b48;border:1px solid #d4a15e;border-radius:9px;padding:10px;min-width:180px"><strong style="color:#e6b16b;font-size:12px">BASS VOLUME · INDEPENDENT</strong><input id="bassVolume" type="range" min="0" max="1" step="0.01" value="0.75" style="width:100%;accent-color:#e6b16b;touch-action:pan-y"><span id="bassVolumeV" style="color:#9be2b8;font-weight:bold">75%</span></label><button id="bassClear" type="button">CLEAR BASS</button></div><div class="basscontrols" style="background:#202731;padding:10px;border-radius:8px;border:1px solid #586675"><strong style="color:#e6b16b;font-size:12px">BASS FILTER</strong><label>CUTOFF <input id="bassCutoff" type="range" min="80" max="8000" step="10" value="4000" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassCutoffV">4000 Hz</span></label><label>RESONANCE <input id="bassResonance" type="range" min="0" max="95" step="1" value="20" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassResonanceV">20%</span></label><label>FILTER ENV <input id="bassEnv" type="range" min="0" max="100" step="1" value="0" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassEnvV">0%</span></label><label style="color:#9be2b8"><input id="bassLfoOn" type="checkbox"> LFO ON</label><label>LFO SPEED <input id="bassLfoRate" type="range" min="0.05" max="12" step="0.05" value="1" style="accent-color:#e6b16b;vertical-align:middle"><span id="bassLfoRateV">1.00 Hz</span></label></div><div id="bassGrid"></div><p class="arpnote">Tik op een stap: kort → lang → rust. Houd een stap ingedrukt (of rechtsklik) om de toonhoogte te kiezen. Shift+klik schakelt accent in of uit. VOLG KEYBOARD transponeert de baslijn naar de laatst gespeelde toets. Iedere maat begint precies op de centrale BPM-klok. De bas heeft een eigen versterkte uitgang, onafhankelijk van het keyboard en het keyboardfilter.</p></section><section class="padseq" id="padSection"><div class="arphead"><h2>08 · PAD SEQUENCER</h2><label style="color:#9be2b8"><input type="checkbox" id="padEnable"> PAD ON</label></div><div class="padseq-controls"><label><input type="checkbox" id="padChords" checked> AKKOORDEN AAN</label><label>KLANK <select id="padSound"><option value="warm">Warm Pad</option><option value="space">Space Pad</option><option value="strings">Dark Strings</option><option value="dreamscape">Dreamscape</option></select></label><label>DUUR <select id="padBars"><option value="1">1 maat</option><option value="2" selected>2 maten</option><option value="4">4 maten</option></select></label><label>VOLUME <input type="range" id="padVolume" min="0" max="1" step="0.01" value="0.28"><span id="padVolumeV">28%</span></label><label>CUTOFF <input type="range" id="padCutoff" min="150" max="12000" step="50" value="3500"><span id="padCutoffV">3500 Hz</span></label><label>ATTACK <input type="range" id="padAttack" min="0.02" max="3" step="0.02" value="0.8"><span id="padAttackV">0.80 s</span></label><label>RELEASE <input type="range" id="padRelease" min="0.1" max="5" step="0.1" value="2"><span id="padReleaseV">2.0 s</span></label><label><input type="checkbox" id="padLfoOn"> LFO ON</label><label>LFO SPEED <input type="range" id="padLfoRate" min="0.05" max="8" step="0.05" value="0.4"><span id="padLfoRateV">0.40 Hz</span></label><label>LFO DEPTH <input type="range" id="padLfoDepth" min="0" max="100" value="35"><span id="padLfoDepthV">35%</span></label></div><div class="padchords" id="padChordsGrid"></div><p class="arpnote">Vier stappen, elk 1, 2 of 4 maten. Met AKKOORDEN UIT klinkt enkel de gekozen grondtoon. De PAD heeft een eigen volume, filter en LFO; alle andere modules blijven onafhankelijk.</p></section><section class="recorder" id="recorder"><div class="arphead"><h2>09 · RECORDER</h2><span class="recstatus" id="recStatus">Klaar om de synthmix op te nemen</span></div><div class="reccontrols"><button type="button" id="recStart">● REC</button><button type="button" id="recStop" disabled>■ STOP</button><button type="button" id="recPlay" disabled>▶ PLAY</button><button type="button" id="recSave" disabled>↓ SAVE</button><span class="recclock" id="recClock">00:00</span></div><audio id="recAudio" controls hidden></audio><p class="arpnote">Neemt de volledige synthmix digitaal op, zonder microfoon. SAVE bewaart de opname op je eigen toestel; niets wordt naar GitHub verzonden.</p></section><div class="keyboard-wrap"><div id="keyboard" class="keyboard"></div></div><div class="foot">Speel met muis of aanraking · Computerklavier: A W S E D F T G Y H U J K · By Teekay & Omnia 2026</div></main><script>
 let recDestination;let ctx,filter,master,outputLimiter,outputTrim,delayNode,wet,fb,drumGain,drumCompressor,bassGain,bassCompressor,bassFilter,bassLfoFilter,bassLfo,bassLfoDepth;const $=id=>document.getElementById(id),voices=new Map(),activePointers=new Map();let noiseBuffer;function init(){if(ctx){ctx.resume();return}ctx=new(window.AudioContext||window.webkitAudioContext)();filter=ctx.createBiquadFilter();filter.type='lowpass';master=ctx.createGain();delayNode=ctx.createDelay(1);wet=ctx.createGain();fb=ctx.createGain();filter.connect(master);// v2.7.4: one final limiter AFTER bass, drums, keyboard and FX are mixed.
 outputLimiter=ctx.createDynamicsCompressor();
 outputLimiter.threshold.value=-10;
@@ -493,7 +493,7 @@ machineArrange=function(){
  bassRender();
 };
 // v3.3: song sections, chord progressions and recurring chorus hook.
-const songSections=[['INTRO',4],['STROFE',8],['REFREIN',8],['STROFE 2',8],['REFREIN',8],['BRIDGE',8],['REFREIN',8],['OUTRO',4]];
+let songSections=[['INTRO',4],['STROFE',8],['REFREIN',8],['STROFE 2',8],['REFREIN',8],['BRIDGE',8],['REFREIN',8],['OUTRO',4]];
 let songSectionIndex=-1,songSectionStart=0,songChorusHook=null,songVerseHook=null;
 const songMinor=[[0,8,3,10],[0,5,8,7],[0,3,10,8],[5,8,0,7]];
 const songMajor=[[0,7,9,5],[0,5,9,7],[5,0,7,9],[9,5,0,7]];
@@ -628,7 +628,7 @@ function rhythmicExpression(plan,slot,section){
 }
 function motifHash(n){let x=(n+motifSeed*1013904223)|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;x=Math.imul(x,0x846ca68b);return (x^(x>>>16))>>>0}
 function motifPhrase(section,bar){
- const cycle=Math.floor(bar/56),phrase=Math.floor(section.local/2);
+ const cycle=Math.floor(bar/songSections.reduce((n,s)=>n+s[1],0)),phrase=Math.floor(section.local/2);
  const id=cycle+':'+section.index+':'+phrase;
  if(motifPlan.has(id))return motifPlan.get(id);
  const chorus=section.name==='REFREIN',intro=section.name==='INTRO',outro=section.name==='OUTRO',bridge=section.name==='BRIDGE';
@@ -673,7 +673,7 @@ machineStep=function(currentStep,when){
  const section=songPosition(bar);
  if(pos===0&&section.index!==songSectionIndex)songChangeSection(section);
  if(pos===0&&section.index!==autoLeadPreviousSection){autoLeadChoice=autoLeadInstrument(section);autoLeadPreviousSection=section.index;}
- const cycle=Math.floor(bar/56);
+ const cycle=Math.floor(bar/songSections.reduce((n,s)=>n+s[1],0));
  if(cycle!==motifCycle){motifPlan.clear();motifCycle=cycle;}
  const plan=motifPhrase(section,bar),slot=plan.rhythm.indexOf(pos);
  if(slot<0)return;
@@ -897,17 +897,35 @@ machineStep=function(step,when){
  duetPreviousStep(step,when);
  if(machineMode!=='auto')return;
  const bar=Math.floor(step/16),pos=step%16,section=songPosition(bar);
- // Alternating solo and duet phrases; keep intro/outro sparse.
- const duetPhrase=Math.floor(section.local/2)%4;
- if(section.name!=='REFREIN'||(duetPhrase!==1&&duetPhrase!==2))return;
+ // v5.7: song-arrangement-led duets, no fixed chorus-only / four-bar restriction.
+ // A deterministic choice per two-bar phrase keeps musical continuity: some phrases
+ // feature a counter-lead, others remain solo. The five models give different roles.
+ const phrase=Math.floor(section.local/2);
+ const name=section.name;
+ if(name==='INTRO'||name==='OUTRO')return;
+ const model=bandModelIndex;
+ const chance=name==='REFREIN'?.72:name==='SOLO'?.88:name==='BRIDGE'?.68:
+              name==='PRE-REFREIN'?.42:name.startsWith('STROFE')?.25:.30;
+ const phraseSeed=((phrase*37+section.index*19+Math.max(0,model)*13+bandSongCount*11)%101)/101;
+ if(phraseSeed>=chance)return;
  // Countermelody has its own sparse rhythm, deliberately offset from the main motif.
+ // v6.0: call-and-response. The first bar belongs to the main lead;
+ // the second bar gives a second instrument room to answer.
  const phrasePos=section.local%2;
- const entries=duetPhrase===1?(phrasePos===0?[2,10]:[6,14]):(phrasePos===0?[6,13]:[2,11]);
+ if(phrasePos===0)return;
+ const callPlan=motifPhrase(songPosition(bar-1),bar-1);
+ const callRhythm=callPlan.rhythm;
+ // Answers start after the opening beat and use a different rhythm from the call.
+ const entries=callRhythm.length>=4?[5,11]:[6,12];
  if(!entries.includes(pos))return;
  const chordIndex=Math.floor(bar/2)%4,root=padRoots[chordIndex];
  const third=padQualities[chordIndex]==='minor'?3:4;
- const choices=[7,third+12,12,third,7,0];
- const idx=(Math.floor(bar/2)+entries.indexOf(pos)+section.index)%choices.length;
+ // Use the call's melodic contour as material, then resolve on a chord tone.
+ const callNotes=callPlan.notes||[0,2,4,2];
+ const callDegree=callNotes[(entries.indexOf(pos)+callNotes.length-2)%callNotes.length]||0;
+ const choices=[0,third,7,12];
+ const answerIndex=entries.indexOf(pos);
+ const idx=answerIndex===entries.length-1?0:Math.abs(callDegree+section.index+phrase)%choices.length;
  let midi=root+24+choices[idx];
  // Stay in a complementary, modest register; avoid the clean guitar's high notes.
  const kind=duetInstrument(section),lo=kind==='guitar'?55:57,hi=kind==='guitar'?67:74;
@@ -937,6 +955,147 @@ machineClearTimers=function(){
  duetPreviousClear();
  for(const [key,v] of duetVoices)duetStop(v.kind,key,v.midi);
  duetVoices.clear();duetLastPitch=null;
+};
+
+
+// v5.6 — Arrangement and form only. Original sample engines and melodic note generation unchanged.
+// Models consist of 4/8/16-bar sections, preserving existing 4-chord phrase logic.
+const bandSongModels=[
+ {name:'Klassieke pop',parts:[['INTRO',4],['STROFE',8],['REFREIN',8],['STROFE 2',8],['REFREIN',8],['BRIDGE',8],['REFREIN',8],['OUTRO',4]]},
+ {name:'Moderne pop',parts:[['INTRO',4],['STROFE',8],['PRE-REFREIN',4],['REFREIN',8],['STROFE 2',8],['PRE-REFREIN',4],['REFREIN',8],['BRIDGE',8],['REFREIN',8],['OUTRO',4]]},
+ {name:'Jazz AABA',parts:[['INTRO',4],['STROFE',8],['STROFE 2',8],['BRIDGE',8],['REFREIN',8],['SOLO',8],['OUTRO',4]]},
+ {name:'Ambient pop',parts:[['INTRO',8],['STROFE',16],['BRIDGE',8],['REFREIN',8],['SOLO',8],['STROFE 2',8],['OUTRO',8]]},
+ {name:'Elektronische opbouw',parts:[['INTRO',8],['STROFE',16],['PRE-REFREIN',8],['REFREIN',16],['BRIDGE',8],['PRE-REFREIN',8],['REFREIN',16],['OUTRO',8]]}
+];
+let bandModelIndex=-1,bandCycleStart=0,bandSongCount=0,bandSectionSerial=-1;
+const bandModelLabel=document.createElement('div');
+bandModelLabel.style.cssText='font-size:12px;color:#9be2b8;margin-top:8px';
+bandModelLabel.textContent='SONGMODEL · AUTO kiest per nieuw nummer een arrangement';
+document.querySelector('#machine').append(bandModelLabel);
+function bandChooseModel(){
+ const next=bandModelIndex<0?Math.floor(Math.random()*bandSongModels.length):(bandModelIndex+1+Math.floor(Math.random()*(bandSongModels.length-1)))%bandSongModels.length;
+ bandModelIndex=next;bandSongCount++;songSections=bandSongModels[next].parts.map(p=>p.slice());
+ songSectionIndex=-1;autoLeadPreviousSection=-1;motifPlan.clear();motifCycle=-1;
+ songMakeHooks();duetLastPitch=null;
+ bandModelLabel.textContent='SONGMODEL · '+bandSongModels[next].name+' · nummer '+bandSongCount;
+}
+const bandPreviousArrange=machineArrange;
+machineArrange=function(){bandModelIndex=-1;bandSongCount=0;bandCycleStart=0;bandSectionSerial=-1;bandPreviousArrange();bandChooseModel();};
+// Every section assigns a role to rhythm, bass, harmony and melodic lead.
+// Existing instruments and approved gains remain untouched outside AUTO.
+const bandPreviousSectionChange=songChangeSection;
+songChangeSection=function(section){
+ bandPreviousSectionChange(section);
+ const n=section.name,chorus=n==='REFREIN',intro=n==='INTRO',outro=n==='OUTRO';
+ const pre=n==='PRE-REFREIN',solo=n==='SOLO',bridge=n==='BRIDGE';
+ const ambient=bandModelIndex===3,electronic=bandModelIndex===4,jazz=bandModelIndex===2;
+ // Drums + bass establish the band, pads play harmony, sampled lead carries melody.
+ const drum=intro?(ambient?.035:.09):outro?.07:pre?.18:bridge?.12:chorus?(electronic?.34:.28):(ambient?.10:jazz?.17:.21);
+ const bass=intro?.14:outro?.12:pre?.23:bridge?.19:chorus?.30:.25;
+ const pad=intro?.25:outro?.22:pre?.27:bridge?.34:chorus?.34:(ambient?.37:.30);
+ [['drumVolume',drum],['bassVolume',bass],['padVolume',pad]].forEach(([id,v])=>{$(id).value=String(v);$(id).dispatchEvent(new Event('input'))});
+ // Pre-chorus builds rhythm gradually; instrumental passage has lighter percussion.
+ if(pre||solo||ambient){for(let i=0;i<patterns.length;i++)for(let j=0;j<64;j++){
+   const b=j%16;
+   patterns[i][j]=i===0?(!intro&&!outro&&(b===0||(pre&&b===8))):
+    i===1?(!intro&&!outro&&(pre?b===12:solo?b===12:ambient?b===12:(b===4||b===12))):
+    i===3?(!intro&&!outro&&(ambient?b===6:solo?b===14:(b===2||b===6||b===10||b===14))):false;
+ }render();}
+ bandModelLabel.textContent='SONGMODEL · '+bandSongModels[bandModelIndex].name+' · '+n+' · nummer '+bandSongCount;
+};
+// Select the main lead by band role; duet eligibility is decided per song section.
+const bandOldLeadChoice=autoLeadInstrument;
+autoLeadInstrument=function(section){
+ if(bandModelIndex===2)return section.name==='BRIDGE'?'piano':section.name==='REFREIN'?'sax':bandOldLeadChoice(section);
+ if(bandModelIndex===3)return section.name==='INTRO'||section.name==='OUTRO'?'piano':bandOldLeadChoice(section);
+ return bandOldLeadChoice(section);
+};
+const bandOldStep=machineStep;
+machineStep=function(step,when){
+ if(machineMode==='auto'&&step%16===0){
+  const bar=Math.floor(step/16),length=songSections.reduce((n,s)=>n+s[1],0);
+  if(bar>0&&bar===bandCycleStart+length){bandCycleStart=bar;bandChooseModel();}
+ }
+ return bandOldStep(step,when);
+};
+
+
+// v5.9 — Intro arrangement: first instrument alone for 2–8 full bars.
+// Only the intro arrangement changes; other sections and approved sounds are untouched.
+const introStyles=['PIANO SOLO','GITAARMOTIEF','PAD-OPBOUW','RITMISCHE INTRO'];
+let introStyle=0,introLastBar=-1,introSoloBars=4,introSecondBars=4,introTotalBars=12;
+const introPreviousChoose=bandChooseModel;
+bandChooseModel=function(){
+ introPreviousChoose();
+ introStyle=(bandSongCount-1)%introStyles.length;
+ introLastBar=-1;
+ // The first instrument gets 2–8 bars; further entrances have room to breathe.
+ introSoloBars=2+Math.floor(Math.random()*7);
+ introSecondBars=2+Math.floor(Math.random()*3);
+ const fullBandBars=2+Math.floor(Math.random()*3);
+ introTotalBars=Math.ceil((introSoloBars+introSecondBars+fullBandBars)/4)*4;
+ songSections[0][1]=introTotalBars;
+ bandModelLabel.textContent+=' · INTRO '+introStyles[introStyle]+' · solo '+introSoloBars+' maten';
+};
+const introPreviousLead=autoLeadInstrument;
+autoLeadInstrument=function(section){
+ if(section.name==='INTRO')return introStyle===1?'guitar':'piano';
+ return introPreviousLead(section);
+};
+const introPreviousMotif=motifPhrase;
+motifPhrase=function(section,bar){
+ const plan=introPreviousMotif(section,bar);
+ if(section.name!=='INTRO')return plan;
+ plan.notes=songChorusHook.slice();
+ const rhythms=[[[0,8],[4,12]],[[0,6,12],[2,10]],[[4],[0,12]],[[8,12],[4,10,14]]];
+ plan.rhythm=rhythms[introStyle][section.local%2].slice();
+ // Pad-led or rhythm-led introductions hold the melodic lead until the second entrance.
+ if((introStyle===2||introStyle===3)&&section.local<introSoloBars)plan.rhythm=[];
+ return plan;
+};
+const introPreviousSectionChange=songChangeSection;
+songChangeSection=function(section){
+ introPreviousSectionChange(section);
+ if(section.name!=='INTRO')return;
+ // Stage zero: exactly one lead, one pad, or one rhythmic voice.
+ const starts=[
+  [0,0,0],  // piano
+  [0,0,0],  // guitar
+  [0,0,.24], // pad
+  [.20,0,0] // drums
+ ][introStyle];
+ [['drumVolume',starts[0]],['bassVolume',starts[1]],['padVolume',starts[2]]].forEach(([id,v])=>{$(id).value=String(v);$(id).dispatchEvent(new Event('input'))});
+ if(introStyle===3){
+  for(let j=0;j<64;j++){const b=j%16;patterns[0][j]=b===0;patterns[1][j]=false;patterns[3][j]=false;}
+  render();
+ }
+};
+const introPreviousStep=machineStep;
+machineStep=function(step,when){
+ if(machineMode==='auto'&&step%16===0){
+  const bar=Math.floor(step/16),section=songPosition(bar);
+  if(section.name==='INTRO'&&introLastBar!==bar){
+   introLastBar=bar;
+   const local=section.local;
+   const phase=local<introSoloBars?0:local<introSoloBars+introSecondBars?1:2;
+   // Phase 0: one instrument. Phase 1: add accompaniment. Phase 2: bass and rhythm.
+   const stages=[
+    [[0,0,0],[0,0,.16],[.12,.18,.22]],
+    [[0,0,0],[0,0,.15],[.14,.19,.22]],
+    [[0,0,.24],[0,.13,.27],[.10,.20,.32]],
+    [[.20,0,0],[.20,.15,0],[.26,.22,.18]]
+   ][introStyle];
+   const levels=stages[phase];
+   // The section handler runs in the original step; apply staged levels just after it.
+   machineSchedule(when+.012,()=>{
+    if(machineMode!=='auto')return;
+    [['drumVolume',0],['bassVolume',1],['padVolume',2]].forEach(([id,i])=>{
+     $(id).value=String(levels[i]);$(id).dispatchEvent(new Event('input'));
+    });
+   });
+  }
+ }
+ return introPreviousStep(step,when);
 };
 
 </script></body></html>
