@@ -1348,6 +1348,23 @@ function v648ViolinPhrase(when,ch,beat,level,bar){
  });
 }
 
+// v6.4.20: section-stable guitar roles. No strum over a guitar solo/duet.
+function v6420GuitarRole(section){
+ const lead=autoLeadInstrument(section);
+ if(lead==='guitar')return Math.floor(section.local/4)%2===0?'solo':'strum';
+ if(duetInstrument(section)==='guitar')return 'duet';
+ return 'strum';
+}
+// Suppress only the automatic guitar lead during its designated rhythm passage.
+// Piano, sax, melodic motifs and all non-guitar song structure stay intact.
+const v6420PreviousPianoOn=pianoSampleOn;
+pianoSampleOn=function(midi,key,expression=1){
+ if(machineMode==='auto'&&String(key).startsWith('autoPiano')&&autoLeadChoice==='guitar'){
+  const step=Number(String(key).slice('autoPiano'.length));
+  if(Number.isFinite(step)&&v6420GuitarRole(songPosition(Math.floor(step/16)))==='strum')return;
+ }
+ return v6420PreviousPianoOn(midi,key,expression);
+};
 const v64OldStep=machineStep;
 machineStep=function(step,when){
  v64OldStep(step,when);
@@ -1356,35 +1373,31 @@ machineStep=function(step,when){
  const intro=name==='INTRO',outro=name==='OUTRO',chorus=name==='REFREIN',bridge=name==='BRIDGE';
  const lead=autoLeadInstrument(section),ch=v64Chord(bar),beat=60/Math.max(50,Math.min(220,+$('bpm').value||120));
  const active=!intro||section.local>=introSoloBars;
- // v6.4.19: genuine strumming: each stroke sweeps the chord in ~45-75 ms.
- // Section-aware rhythms; preserve the existing solo guitar and piano lines.
+ // v6.4.20: one guitar role at a time, selected by musical passage.
+ // A guitar-led song alternates four-bar SOLO and STRUM passages.
+ // When a duet already uses guitar, it has priority over strumming.
  if(active&&$('v64Guitar').checked&&!outro){
-  const guitarLead=lead==='guitar';
-  // Guitar-led sections alternate between solo passages and rhythm passages.
-  const rhythmPassage=!guitarLead || (Math.floor(section.local/4)%2===1);
-  const allow= rhythmPassage && (chorus || name==='COUPLET' || name==='VERSE' || name==='MELODIE' || bridge || name==='STROFE' || guitarLead);
-  if(allow){
+  const rhythmRole=v6420GuitarRole(section)==='strum';
+  if(rhythmRole){
    const style=chorus?'full':bridge?'sparse':intro?'soft':'verse';
-   const patterns={
-    full:[0,4,6,10,12,14],  // down, down, up, up, down, up
-    verse:[0,6,8,14],
-    sparse:[0,8,14],
-    soft:[0,8]
-   };
-   const hits=patterns[style];
-   if(hits.includes(pos) && !(section.local%4===3&&pos===14&&style==='verse')){
-    // A guitar chord is a triad spread over two octaves, not an arpeggio over beats.
-    // Existing guitarOctave=-1 is applied by guitarOn, as before.
-    const chord=[ch.root+24,ch.root+31,ch.root+24+ch.third,ch.root+36,ch.root+31+12];
+   const patterns={full:[0,4,6,10,12,14],verse:[0,6,8,14],sparse:[0,8,14],soft:[0,8]};
+   if(patterns[style].includes(pos)&&!(section.local%4===3&&pos===14&&style==='verse')){
+    // The chord uses a compact, playable guitar register (sounding E2–G4).
+    // guitarOn applies the user's octave control, so compensate here.
+    let root=ch.root;
+    while(root<40)root+=12;
+    while(root>49)root-=12;
+    const sounding=[root,root+7,root+12,root+12+ch.third];
+    const octaveCompensation=-12*Number($('guitarOctave').value);
     const up=(pos===6||pos===10||pos===14);
-    const notes=up?chord.slice().reverse():chord;
-    const expression=(chorus?.135:bridge?.075:.095)*(guitarLead?.85:1);
-    const spacing=(up?.009:.014); // 36-56 ms across five strings
+    const notes=up?sounding.slice().reverse():sounding;
+    const expression=(chorus?.125:bridge?.07:.085);
+    const spacing=up?.012:.016; // 36–48 ms for four strings
     const strokeDuration=Math.min(beat*(chorus?.65:.85),.65);
     notes.forEach((m,i)=>{
-     const key='v6419strum_'+step+'_'+i;
+     const key='v6420strum_'+step+'_'+i;
      v64Schedule(when+.012+i*spacing,()=>{
-      guitarOn(m,key,expression*(.90+(.06*i)));
+      guitarOn(m+octaveCompensation,key,expression*(.90+.06*i));
       const id=setTimeout(()=>{v64Timers.delete(id);guitarOff(key)},strokeDuration*1000);
       v64Timers.add(id);
      });
