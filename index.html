@@ -2210,4 +2210,15 @@ pianoSampleOn=function(midi,key,expression=1,duration){
  requestAnimationFrame(animate);
 })();
 </script>
+
+<style id="module-00-final-visibility-fix">
+/* Module 00: definitieve zichtbaarheid, na alle oudere stylesheets. */
+#machine > .machine-buttons,
+#machine > .composer-quick,
+#machine > label,
+#machine > p { display:none!important; }
+#machine > .composer-minimal-buttons {display:flex!important;align-items:flex-end!important;justify-content:flex-start!important;gap:5px!important;flex-wrap:nowrap!important;}
+/* De originele START- en STOP-afbeeldingen en hun maten blijven intact. */
+#machine > #machineStatus {display:block!important;}
+</style>
 </body></html>
